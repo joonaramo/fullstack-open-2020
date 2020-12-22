@@ -1,5 +1,53 @@
 import React, { useState } from "react";
 
+const Filter = ({ filter, setFilter }) => {
+  return (
+    <div>
+      filter shown with
+      <input value={filter} onChange={(e) => setFilter(e.target.value)} />
+    </div>
+  );
+};
+
+const PersonForm = ({
+  addPerson,
+  newName,
+  setNewName,
+  newNumber,
+  setNewNumber,
+}) => {
+  return (
+    <form onSubmit={(e) => addPerson(e)}>
+      <div>
+        name:
+        <input value={newName} onChange={(e) => setNewName(e.target.value)} />
+      </div>
+      <div>
+        number:
+        <input
+          value={newNumber}
+          onChange={(e) => setNewNumber(e.target.value)}
+        />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
+
+const Persons = ({ persons, filter }) => {
+  return persons
+    .filter((person) =>
+      person.name.toLowerCase().includes(filter.toLowerCase())
+    )
+    .map((person) => (
+      <p key={person.name}>
+        {person.name} {person.number}
+      </p>
+    ));
+};
+
 const App = () => {
   const [persons, setPersons] = useState([
     { name: "Arto Hellas", number: "040-123456" },
@@ -28,36 +76,17 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with
-        <input value={filter} onChange={(e) => setFilter(e.target.value)} />
-      </div>
-      <form onSubmit={(e) => addPerson(e)}>
-        <div>
-          name:
-          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-        </div>
-        <div>
-          number:
-          <input
-            value={newNumber}
-            onChange={(e) => setNewNumber(e.target.value)}
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      {persons
-        .filter((person) =>
-          person.name.toLowerCase().includes(filter.toLowerCase())
-        )
-        .map((person) => (
-          <p key={person.name}>
-            {person.name} {person.number}
-          </p>
-        ))}
+      <Filter filter={filter} setFilter={setFilter} />
+      <h3>Add a new</h3>
+      <PersonForm
+        addPerson={addPerson}
+        newName={newName}
+        setNewName={setNewName}
+        newNumber={newNumber}
+        setNewNumber={setNewNumber}
+      />
+      <h3>Numbers</h3>
+      <Persons persons={persons} filter={filter} />
     </div>
   );
 };
