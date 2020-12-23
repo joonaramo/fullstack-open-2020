@@ -69,7 +69,7 @@ const Filter = ({ filter, setFilter }) => {
 
 const Countries = ({ countries, setFilter }) => {
   return countries.map((country) => (
-    <div>
+    <div key={country.alpha3Code}>
       <p>{country.name}</p>
       <button onClick={() => setFilter(country.name)}>show</button>
     </div>
