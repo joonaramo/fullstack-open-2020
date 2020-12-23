@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
 import { getAll, create, update, remove } from "./services/persons";
 
@@ -83,7 +82,7 @@ const App = () => {
       ) {
         const { data } = await update(found.id, newPerson);
         setPersons(
-          persons.filter((person) => person.id !== found.id).concat(data)
+          persons.map((person) => (person.id !== found.id ? person : data))
         );
         setNewName("");
         setNewNumber("");
