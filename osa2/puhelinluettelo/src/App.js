@@ -91,30 +91,7 @@ const App = () => {
           `${found.name} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        try {
-          const { data } = await update(found.id, newPerson);
-          setPersons(
-            persons.map((person) => (person.id !== found.id ? person : data))
-          );
-          setNewName("");
-          setNewNumber("");
-          setMessage(`Updated ${data.name}`);
-          setMessageType("success");
-          setTimeout(() => {
-            setMessage(null);
-            setMessageType("");
-          }, 5000);
-        } catch (err) {
-          setMessage(
-            `Information of ${found.name} has already been removed from server`
-          );
-          setMessageType("error");
-          setTimeout(() => {
-            setMessage(null);
-            setMessageType("");
-          }, 5000);
-          setPersons(persons.filter((person) => person.id !== found.id));
-        }
+        updatePerson(found, newPerson);
       }
     } else {
       try {
@@ -131,6 +108,33 @@ const App = () => {
       } catch (err) {
         console.log(err);
       }
+    }
+  };
+
+  const updatePerson = async (found, newPerson) => {
+    try {
+      const { data } = await update(found.id, newPerson);
+      setPersons(
+        persons.map((person) => (person.id !== found.id ? person : data))
+      );
+      setNewName("");
+      setNewNumber("");
+      setMessage(`Updated ${data.name}`);
+      setMessageType("success");
+      setTimeout(() => {
+        setMessage(null);
+        setMessageType("");
+      }, 5000);
+    } catch (err) {
+      setMessage(
+        `Information of ${found.name} has already been removed from server`
+      );
+      setMessageType("error");
+      setTimeout(() => {
+        setMessage(null);
+        setMessageType("");
+      }, 5000);
+      setPersons(persons.filter((person) => person.id !== found.id));
     }
   };
 
