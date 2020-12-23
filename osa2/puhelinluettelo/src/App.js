@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import { getAll, create } from "./services/persons";
+import { getAll, create, remove } from "./services/persons";
 
 const Filter = ({ filter, setFilter }) => {
   return (
@@ -74,10 +74,7 @@ const App = () => {
     if (persons.find((person) => person.name === newName)) {
       return alert(`${newName} is already added to phonebook`);
     }
-    const { data } = await axios.post(
-      "http://localhost:3001/persons",
-      newPerson
-    );
+    const { data } = await create(newPerson);
     setPersons(persons.concat(data));
     setNewName("");
     setNewNumber("");
