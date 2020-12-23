@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import { getAll, create, remove } from "./services/persons";
+import { getAll, create, update, remove } from "./services/persons";
 
 const Filter = ({ filter, setFilter }) => {
   return (
@@ -74,13 +74,26 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    if (persons.find((person) => person.name === newName)) {
-      return alert(`${newName} is already added to phonebook`);
+    const found = persons.find((person) => person.name === newName);
+    if (found) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const { data } = await update(found.id, newPerson);
+        setPersons(
+          persons.filter((person) => person.id !== found.id).concat(data)
+        );
+        setNewName("");
+        setNewNumber("");
+      }
+    } else {
+      const { data } = await create(newPerson);
+      setPersons(persons.concat(data));
+      setNewName("");
+      setNewNumber("");
     }
-    const { data } = await create(newPerson);
-    setPersons(persons.concat(data));
-    setNewName("");
-    setNewNumber("");
   };
 
   const deletePerson = async ({ id, name }) => {
