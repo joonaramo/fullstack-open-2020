@@ -2,6 +2,44 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
+const SingleCountry = ({ country }) => {
+  return (
+    <div>
+      <h1>{country.name}</h1>
+      <p>capital {country.capital}</p>
+      <p>population {country.population}</p>
+      <h2>languages</h2>
+      <ul>
+        {country.languages.map((language) => (
+          <li>{language.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const Filter = ({ filter, setFilter }) => {
+  return (
+    <>
+      find countries{" "}
+      <input
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        type="text"
+      />
+    </>
+  );
+};
+
+const Countries = ({ countries, setFilter }) => {
+  return countries.map((country) => (
+    <div>
+      <p>{country.name}</p>
+      <button onClick={() => setFilter(country.name)}>show</button>
+    </div>
+  ));
+};
+
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [filteredCountries, setFilteredCountries] = useState([]);
@@ -24,28 +62,13 @@ const App = () => {
 
   return (
     <div>
-      find countries{" "}
-      <input
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        type="text"
-      />
+      <Filter filter={filter} setFilter={setFilter} />
       {filteredCountries.length > 10 ? (
         <p>Too many matches, specify another filter</p>
       ) : filteredCountries.length === 1 ? (
-        <>
-          <h1>{filteredCountries[0].name}</h1>
-          <p>capital {filteredCountries[0].capital}</p>
-          <p>population {filteredCountries[0].population}</p>
-          <h2>languages</h2>
-          <ul>
-            {filteredCountries[0].languages.map((language) => (
-              <li>{language.name}</li>
-            ))}
-          </ul>
-        </>
+        <SingleCountry country={filteredCountries[0]} />
       ) : (
-        filteredCountries.map((country) => <p>{country.name}</p>)
+        <Countries countries={filteredCountries} setFilter={setFilter} />
       )}
     </div>
   );
