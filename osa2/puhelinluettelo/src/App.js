@@ -39,15 +39,18 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons, filter }) => {
+const Persons = ({ persons, filter, deletePerson }) => {
   return persons
     .filter((person) =>
       person.name.toLowerCase().includes(filter.toLowerCase())
     )
     .map((person) => (
-      <p key={person.name}>
-        {person.name} {person.number}
-      </p>
+      <div key={person.id}>
+        <p>
+          {person.name} {person.number}
+        </p>
+        <button onClick={() => deletePerson(person)}>delete</button>
+      </div>
     ));
 };
 
@@ -80,6 +83,14 @@ const App = () => {
     setNewNumber("");
   };
 
+  const deletePerson = async ({ id, name }) => {
+    if (window.confirm(`Delete ${name} ?`)) {
+      await remove(id);
+      const newPersons = persons.filter((person) => person.id !== id);
+      setPersons(newPersons);
+    }
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -93,7 +104,7 @@ const App = () => {
         setNewNumber={setNewNumber}
       />
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} deletePerson={deletePerson} />
     </div>
   );
 };
