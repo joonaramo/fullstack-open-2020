@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./App.css";
 
 import { getAll, create, update, remove } from "./services/persons";
 
@@ -53,11 +54,21 @@ const Persons = ({ persons, filter, deletePerson }) => {
     ));
 };
 
+const Notification = ({ message, type }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className={`notification ${type}`}>{message}</div>;
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState("");
 
   useEffect(() => {
     const fetchPersons = async () => {
@@ -77,35 +88,72 @@ const App = () => {
     if (found) {
       if (
         window.confirm(
-          `${newName} is already added to phonebook, replace the old number with a new one?`
+          `${found.name} is already added to phonebook, replace the old number with a new one?`
         )
       ) {
-        const { data } = await update(found.id, newPerson);
-        setPersons(
-          persons.map((person) => (person.id !== found.id ? person : data))
-        );
-        setNewName("");
-        setNewNumber("");
+        try {
+          const { data } = await update(found.id, newPerson);
+          setPersons(
+            persons.map((person) => (person.id !== found.id ? person : data))
+          );
+          setNewName("");
+          setNewNumber("");
+          setMessage(`Updated ${data.name}`);
+          setMessageType("success");
+          setTimeout(() => {
+            setMessage(null);
+            setMessageType("");
+          }, 5000);
+        } catch (err) {
+          setMessage(
+            `Information of ${found.name} has already been removed from server`
+          );
+          setMessageType("error");
+          setTimeout(() => {
+            setMessage(null);
+            setMessageType("");
+          }, 5000);
+          setPersons(persons.filter((person) => person.id !== found.id));
+        }
       }
     } else {
-      const { data } = await create(newPerson);
-      setPersons(persons.concat(data));
-      setNewName("");
-      setNewNumber("");
+      try {
+        const { data } = await create(newPerson);
+        setPersons(persons.concat(data));
+        setNewName("");
+        setNewNumber("");
+        setMessage(`Added ${data.name}`);
+        setMessageType("success");
+        setTimeout(() => {
+          setMessage(null);
+          setMessageType("");
+        }, 5000);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
   const deletePerson = async ({ id, name }) => {
     if (window.confirm(`Delete ${name} ?`)) {
-      await remove(id);
-      const newPersons = persons.filter((person) => person.id !== id);
-      setPersons(newPersons);
+      try {
+        await remove(id);
+        const newPersons = persons.filter((person) => person.id !== id);
+        setPersons(newPersons);
+        setMessage(`Deleted ${name}`);
+        setMessageType("success");
+        setTimeout(() => {
+          setMessage(null);
+          setMessageType("");
+        }, 5000);
+      } catch (err) {}
     }
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} type={messageType} />
       <Filter filter={filter} setFilter={setFilter} />
       <h3>Add a new</h3>
       <PersonForm
