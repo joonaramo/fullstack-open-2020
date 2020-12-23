@@ -3,18 +3,54 @@ import axios from "axios";
 import "./App.css";
 
 const SingleCountry = ({ country }) => {
+  const [weather, setWeather] = useState({});
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      const api_key = process.env.REACT_APP_API_KEY;
+      const { data } = await axios.get(
+        `http://api.weatherstack.com/current?access_key=${api_key}&query=${country.capital}`
+      );
+      setWeather(data.current);
+    };
+    fetchWeather();
+  }, [country.capital]);
   return (
     <div>
       <h1>{country.name}</h1>
       <p>capital {country.capital}</p>
       <p>population {country.population}</p>
-      <h2>languages</h2>
-      <ul>
-        {country.languages.map((language) => (
-          <li>{language.name}</li>
-        ))}
-      </ul>
+      <h2>spoken languages</h2>
+      <Languages languages={country.languages} />
+      <img width="200" height="100" src={country.flag} alt="" />
+      <h2>Weather in {country.capital} </h2>
+      <Weather weather={weather} />
     </div>
+  );
+};
+
+const Weather = ({ weather }) => {
+  return (
+    <div>
+      <p>
+        <b>temperature: </b>
+        {weather.temperature} celsius
+      </p>
+      <img src={weather.weather_icons} alt="" />
+      <p>
+        <b>wind: </b> {weather.wind_speed} mph to direction {weather.wind_dir}{" "}
+      </p>
+    </div>
+  );
+};
+
+const Languages = ({ languages }) => {
+  return (
+    <ul>
+      {languages.map((language) => (
+        <li key={language.iso639_2}>{language.name}</li>
+      ))}
+    </ul>
   );
 };
 
