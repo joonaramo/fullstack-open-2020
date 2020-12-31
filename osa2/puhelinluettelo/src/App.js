@@ -106,7 +106,12 @@ const App = () => {
           setMessageType("");
         }, 5000);
       } catch (err) {
-        console.log(err);
+        setMessage(err.response.data.error);
+        setMessageType("error");
+        setTimeout(() => {
+          setMessage(null);
+          setMessageType("");
+        }, 5000);
       }
     }
   };
