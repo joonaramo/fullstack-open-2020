@@ -91,9 +91,9 @@ describe('total likes', () => {
 });
 
 describe('favorite blog', () => {
-  test('of empty list is empty object', () => {
+  test('of empty list returns undefined', () => {
     const result = listHelper.favoriteBlog(emptyList);
-    expect(result).toEqual({});
+    expect(result).toBe(undefined);
   });
 
   test('when list has one blog return that', () => {
@@ -111,5 +111,22 @@ describe('favorite blog', () => {
       __v: 0,
       _id: '5a422b3a1b54a676234d17f9',
     });
+  });
+});
+
+describe('mostBlogs', () => {
+  test('of empty list returns undefined', () => {
+    const result = listHelper.mostBlogs(emptyList);
+    expect(result).toBe(undefined);
+  });
+
+  test('when list has only one blog return the author of that', () => {
+    const result = listHelper.mostBlogs(listWithOneBlog);
+    expect(result).toEqual({ author: 'Edsger W. Dijkstra', blogs: 1 });
+  });
+
+  test('of a bigger list returns correct author', () => {
+    const result = listHelper.mostBlogs(allBlogs);
+    expect(result).toEqual({ author: 'Robert C. Martin', blogs: 3 });
   });
 });
