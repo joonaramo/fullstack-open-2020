@@ -105,6 +105,24 @@ describe('post blog', () => {
   });
 });
 
+describe('put blog', () => {
+  test('should edit the fields', async () => {
+    const resp = await api.get('/api/blogs');
+    const firstBlogId = resp.body[0].id;
+    const editedBlog = {
+      id: firstBlogId,
+      title: 'React Hooks',
+      author: 'Mike Doe',
+      url: 'https://reacthooks.com/',
+      likes: 3,
+    };
+    const { body } = await api
+      .put(`/api/blogs/${firstBlogId}`)
+      .send(editedBlog);
+    expect(body).toEqual(editedBlog);
+  });
+});
+
 describe('delete blog', () => {
   test('should delete blog', async () => {
     const respBeforeDelete = await api.get('/api/blogs');

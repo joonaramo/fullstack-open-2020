@@ -25,6 +25,22 @@ blogRouter.post('/', async (req, res) => {
   }
 });
 
+blogRouter.put('/:id', async (req, res) => {
+  if (req.body.title === undefined) {
+    return res.status(400).json({ error: 'Missing title' });
+  } else if (req.body.url === undefined) {
+    return res.status(400).json({ error: 'Missing URL' });
+  }
+  try {
+    const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(blog);
+  } catch (err) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 blogRouter.delete('/:id', async (req, res) => {
   try {
     await Blog.findByIdAndDelete(req.params.id);
