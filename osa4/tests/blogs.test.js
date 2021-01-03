@@ -83,6 +83,16 @@ describe('post blog', () => {
     const getResp = await api.get('/api/blogs');
     expect(getResp.body).toHaveLength(initialBlogs.length + 1);
   });
+
+  test('if likes is not given a value, set it to 0', async () => {
+    const newBlog = {
+      title: 'Example Blog',
+      author: 'John Doe',
+      url: 'https://example.com/blog',
+    };
+    const { body } = await api.post('/api/blogs').send(newBlog);
+    expect(body.likes).toBe(0);
+  });
 });
 
 afterAll(() => {
