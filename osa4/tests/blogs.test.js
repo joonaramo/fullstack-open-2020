@@ -69,6 +69,22 @@ describe('get blogs', () => {
   });
 });
 
+describe('post blog', () => {
+  test('new blog can be added', async () => {
+    const newBlog = {
+      title: 'Example Blog',
+      author: 'John Doe',
+      url: 'https://example.com/blog',
+    };
+    const postResp = await api.post('/api/blogs').send(newBlog);
+    expect(postResp.body.title).toEqual(newBlog.title);
+    expect(postResp.body.author).toEqual(newBlog.author);
+    expect(postResp.body.url).toEqual(newBlog.url);
+    const getResp = await api.get('/api/blogs');
+    expect(getResp.body).toHaveLength(initialBlogs.length + 1);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
