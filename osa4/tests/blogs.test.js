@@ -93,6 +93,22 @@ describe('post blog', () => {
     const { body } = await api.post('/api/blogs').send(newBlog);
     expect(body.likes).toBe(0);
   });
+
+  test('blog without title is not added', async () => {
+    const newBlog = {
+      author: 'John Doe',
+      url: 'https://example.com/blog',
+    };
+    await api.post('/api/blogs').send(newBlog).expect(400);
+  });
+
+  test('blog without url is not added', async () => {
+    const newBlog = {
+      title: 'Example Blog',
+      author: 'John Doe',
+    };
+    await api.post('/api/blogs').send(newBlog).expect(400);
+  });
 });
 
 afterAll(() => {
