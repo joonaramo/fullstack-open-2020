@@ -6,14 +6,12 @@ const Blog = require('../models/blog');
 
 const initialBlogs = [
   {
-    id: '5a422a851b54a676234d17f7',
     title: 'React patterns',
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
     likes: 7,
   },
   {
-    id: '5a422aa71b54a676234d17f8',
     title: 'Go To Statement Considered Harmful',
     author: 'Edsger W. Dijkstra',
     url:
@@ -21,14 +19,12 @@ const initialBlogs = [
     likes: 5,
   },
   {
-    id: '5a422b3a1b54a676234d17f9',
     title: 'Canonical string reduction',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
     likes: 12,
   },
   {
-    id: '5a422b891b54a676234d17fa',
     title: 'First class tests',
     author: 'Robert C. Martin',
     url:
@@ -36,7 +32,6 @@ const initialBlogs = [
     likes: 10,
   },
   {
-    id: '5a422ba71b54a676234d17fb',
     title: 'TDD harms architecture',
     author: 'Robert C. Martin',
     url:
@@ -44,7 +39,6 @@ const initialBlogs = [
     likes: 0,
   },
   {
-    id: '5a422bc61b54a676234d17fc',
     title: 'Type wars',
     author: 'Robert C. Martin',
     url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
@@ -108,6 +102,16 @@ describe('post blog', () => {
       author: 'John Doe',
     };
     await api.post('/api/blogs').send(newBlog).expect(400);
+  });
+});
+
+describe('delete blog', () => {
+  test('should delete blog', async () => {
+    const respBeforeDelete = await api.get('/api/blogs');
+    const firstBlogId = respBeforeDelete.body[0].id;
+    await api.delete(`/api/blogs/${firstBlogId}`);
+    const { body } = await api.get('/api/blogs');
+    expect(body).toHaveLength(initialBlogs.length - 1);
   });
 });
 
