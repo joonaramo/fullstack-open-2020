@@ -1,16 +1,16 @@
 const blogRouter = require('express').Router();
 const Blog = require('../models/blog');
 
-blogRouter.get('/', async (req, res) => {
+blogRouter.get('/', async (req, res, next) => {
   try {
     const blogs = await Blog.find();
     res.json(blogs);
   } catch (err) {
-    res.status(400).json({ error: error.message });
+    next(err);
   }
 });
 
-blogRouter.post('/', async (req, res) => {
+blogRouter.post('/', async (req, res, next) => {
   if (req.body.title === undefined) {
     return res.status(400).json({ error: 'Missing title' });
   } else if (req.body.url === undefined) {
@@ -21,11 +21,11 @@ blogRouter.post('/', async (req, res) => {
     const blog = await newBlog.save();
     res.status(201).json(blog);
   } catch (err) {
-    res.status(400).json({ error: error.message });
+    next(err);
   }
 });
 
-blogRouter.put('/:id', async (req, res) => {
+blogRouter.put('/:id', async (req, res, next) => {
   if (req.body.title === undefined) {
     return res.status(400).json({ error: 'Missing title' });
   } else if (req.body.url === undefined) {
@@ -37,16 +37,16 @@ blogRouter.put('/:id', async (req, res) => {
     });
     res.json(blog);
   } catch (err) {
-    res.status(400).json({ error: error.message });
+    next(err);
   }
 });
 
-blogRouter.delete('/:id', async (req, res) => {
+blogRouter.delete('/:id', async (req, res, next) => {
   try {
     await Blog.findByIdAndDelete(req.params.id);
     res.status(204).end();
   } catch (err) {
-    res.status(400).json({ error: error.message });
+    next(err);
   }
 });
 
