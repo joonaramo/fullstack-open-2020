@@ -3,14 +3,6 @@ const jwt = require('jsonwebtoken');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
-const getTokenFrom = (req) => {
-  const authorization = req.get('authorization');
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7);
-  }
-  return null;
-};
-
 blogRouter.get('/', async (req, res, next) => {
   try {
     const blogs = await Blog.find().populate('user', { username: 1, name: 1 });
@@ -21,10 +13,9 @@ blogRouter.get('/', async (req, res, next) => {
 });
 
 blogRouter.post('/', async (req, res, next) => {
-  const token = getTokenFrom(req);
   let decodedToken;
   try {
-    decodedToken = jwt.verify(token, process.env.SECRET);
+    decodedToken = jwt.verify(req.token, process.env.SECRET);
   } catch (err) {
     return next(err);
   }
@@ -64,6 +55,17 @@ blogRouter.put('/:id', async (req, res, next) => {
 });
 
 blogRouter.delete('/:id', async (req, res, next) => {
+  try {
+    const decodedToken = jwt.verify(req.token, process.env.SECRET);
+    const blog = await Blog.findById(req.params.id);
+    if (blog.user.toString() !== decodedToken.id.toString()) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+      });
+    }
+  } catch (err) {
+    return next(err);
+  }
   try {
     await Blog.findByIdAndDelete(req.params.id);
     res.status(204).end();
