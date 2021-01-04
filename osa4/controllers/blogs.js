@@ -1,6 +1,15 @@
 const blogRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Blog = require('../models/blog');
 const User = require('../models/user');
+
+const getTokenFrom = (req) => {
+  const authorization = req.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7);
+  }
+  return null;
+};
 
 blogRouter.get('/', async (req, res, next) => {
   try {
@@ -12,12 +21,20 @@ blogRouter.get('/', async (req, res, next) => {
 });
 
 blogRouter.post('/', async (req, res, next) => {
+  const token = getTokenFrom(req);
+  let decodedToken;
+  try {
+    decodedToken = jwt.verify(token, process.env.SECRET);
+  } catch (err) {
+    return next(err);
+  }
+  const user = await User.findById(decodedToken.id);
+
   if (req.body.title === undefined) {
     return res.status(400).json({ error: 'Missing title' });
   } else if (req.body.url === undefined) {
     return res.status(400).json({ error: 'Missing URL' });
   }
-  const user = await User.findOne();
   const newBlog = new Blog(req.body);
   newBlog.user = user._id;
   try {
