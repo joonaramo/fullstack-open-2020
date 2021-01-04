@@ -4,57 +4,22 @@ const app = require('../app');
 const api = supertest(app);
 const Blog = require('../models/blog');
 
-const initialBlogs = [
-  {
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url: 'https://reactpatterns.com/',
-    likes: 7,
-  },
-  {
-    title: 'Go To Statement Considered Harmful',
-    author: 'Edsger W. Dijkstra',
-    url:
-      'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
-  },
-  {
-    title: 'Canonical string reduction',
-    author: 'Edsger W. Dijkstra',
-    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-    likes: 12,
-  },
-  {
-    title: 'First class tests',
-    author: 'Robert C. Martin',
-    url:
-      'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-    likes: 10,
-  },
-  {
-    title: 'TDD harms architecture',
-    author: 'Robert C. Martin',
-    url:
-      'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html',
-    likes: 0,
-  },
-  {
-    title: 'Type wars',
-    author: 'Robert C. Martin',
-    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-    likes: 2,
-  },
-];
+const helper = require('./test_helper');
+
+let user;
 
 beforeEach(async () => {
   await Blog.deleteMany();
-  await Blog.insertMany(initialBlogs);
+  user = await helper.setRootUser();
+  const blogs = helper.initialBlogs;
+  const blogsWithUser = blogs.map((blog) => ({ ...blog, user: user._id }));
+  await Blog.insertMany(blogsWithUser);
 });
 
 describe('get blogs', () => {
   test('correct amount of blogs are returned', async () => {
     const { body } = await api.get('/api/blogs');
-    expect(body).toHaveLength(initialBlogs.length);
+    expect(body).toHaveLength(helper.initialBlogs.length);
   });
 
   test('blog has field called "id"', async () => {
@@ -64,18 +29,25 @@ describe('get blogs', () => {
 });
 
 describe('post blog', () => {
+  let token;
+  beforeEach(async () => {
+    token = await helper.loginUser(user);
+  });
   test('new blog can be added', async () => {
     const newBlog = {
       title: 'Example Blog',
       author: 'John Doe',
       url: 'https://example.com/blog',
     };
-    const postResp = await api.post('/api/blogs').send(newBlog);
+    const postResp = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${token}`);
     expect(postResp.body.title).toEqual(newBlog.title);
     expect(postResp.body.author).toEqual(newBlog.author);
     expect(postResp.body.url).toEqual(newBlog.url);
     const getResp = await api.get('/api/blogs');
-    expect(getResp.body).toHaveLength(initialBlogs.length + 1);
+    expect(getResp.body).toHaveLength(helper.initialBlogs.length + 1);
   });
 
   test('if likes is not given a value, set it to 0', async () => {
@@ -84,7 +56,10 @@ describe('post blog', () => {
       author: 'John Doe',
       url: 'https://example.com/blog',
     };
-    const { body } = await api.post('/api/blogs').send(newBlog);
+    const { body } = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${token}`);
     expect(body.likes).toBe(0);
   });
 
@@ -93,7 +68,11 @@ describe('post blog', () => {
       author: 'John Doe',
       url: 'https://example.com/blog',
     };
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${token}`)
+      .expect(400);
   });
 
   test('blog without url is not added', async () => {
@@ -101,7 +80,20 @@ describe('post blog', () => {
       title: 'Example Blog',
       author: 'John Doe',
     };
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `bearer ${token}`)
+      .expect(400);
+  });
+
+  test('blog without auth header is not added', async () => {
+    const newBlog = {
+      title: 'Example Blog',
+      author: 'John Doe',
+      url: 'https://example.com/blog',
+    };
+    await api.post('/api/blogs').send(newBlog).expect(401);
   });
 });
 
@@ -119,17 +111,24 @@ describe('put blog', () => {
     const { body } = await api
       .put(`/api/blogs/${firstBlogId}`)
       .send(editedBlog);
+    delete body.user;
     expect(body).toEqual(editedBlog);
   });
 });
 
 describe('delete blog', () => {
+  let token;
+  beforeEach(async () => {
+    token = await helper.loginUser(user);
+  });
   test('should delete blog', async () => {
     const respBeforeDelete = await api.get('/api/blogs');
     const firstBlogId = respBeforeDelete.body[0].id;
-    await api.delete(`/api/blogs/${firstBlogId}`);
+    await api
+      .delete(`/api/blogs/${firstBlogId}`)
+      .set('Authorization', `bearer ${token}`);
     const { body } = await api.get('/api/blogs');
-    expect(body).toHaveLength(initialBlogs.length - 1);
+    expect(body).toHaveLength(helper.initialBlogs.length - 1);
   });
 });
 
