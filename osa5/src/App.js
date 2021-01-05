@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Blog from './components/Blog';
+import BlogForm from './components/BlogForm';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
@@ -8,6 +9,9 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -18,6 +22,7 @@ const App = () => {
     if (loggedInUser) {
       const user = JSON.parse(loggedInUser);
       setUser(user);
+      blogService.setToken(user.token);
     }
   }, []);
 
@@ -27,10 +32,29 @@ const App = () => {
       const user = await loginService.login({ username, password });
       setUser(user);
       window.localStorage.setItem('loggedInUser', JSON.stringify(user));
+      blogService.setToken(user.token);
       setUsername('');
       setPassword('');
     } catch (err) {
       console.log('wrong credentials');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const newBlog = {
+        title,
+        author,
+        url,
+      };
+      const blog = await blogService.create(newBlog);
+      setBlogs(blogs.concat(blog));
+      setTitle('');
+      setAuthor('');
+      setUrl('');
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -72,6 +96,15 @@ const App = () => {
       <h2>blogs</h2>
       <p>{user.username} logged in</p>
       <button onClick={logout}>logout</button>
+      <BlogForm
+        title={title}
+        author={author}
+        url={url}
+        setTitle={setTitle}
+        setAuthor={setAuthor}
+        setUrl={setUrl}
+        handleSubmit={handleSubmit}
+      />
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
