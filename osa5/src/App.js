@@ -13,16 +13,17 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
 
   const blogFormRef = useRef();
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    const getBlogs = async () => {
+      const blogs = await blogService.getAll();
+      setBlogs(blogs);
+    };
+    getBlogs();
   }, []);
 
   useEffect(() => {
@@ -50,32 +51,6 @@ const App = () => {
         setMessage(null);
         setMessageType('');
       }, 5000);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const newBlog = {
-        title,
-        author,
-        url,
-      };
-      const blog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(blog));
-      setTitle('');
-      setAuthor('');
-      setUrl('');
-      blogFormRef.current.toggleVisibility();
-      setMessage(`a new blog ${blog.title} by ${blog.author} added`);
-      setMessageType('success');
-      setTimeout(() => {
-        setMessage(null);
-        setMessageType('');
-      }, 5000);
-    } catch (err) {
-      setMessage(err.response.data.error);
-      setMessage('error');
     }
   };
 
@@ -108,13 +83,11 @@ const App = () => {
       <h2>create new</h2>
       <Togglable ref={blogFormRef} buttonLabel='new blog'>
         <BlogForm
-          title={title}
-          author={author}
-          url={url}
-          setTitle={setTitle}
-          setAuthor={setAuthor}
-          setUrl={setUrl}
-          handleSubmit={handleSubmit}
+          blogs={blogs}
+          setBlogs={setBlogs}
+          setMessage={setMessage}
+          setMessageType={setMessageType}
+          blogFormRef={blogFormRef}
         />
       </Togglable>
       {blogs.map((blog) => (
