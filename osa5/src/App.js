@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Blog from './components/Blog';
 import BlogForm from './components/BlogForm';
 import Notification from './components/Notification';
+import Login from './components/Login';
+import Togglable from './components/Togglable';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
@@ -16,6 +18,8 @@ const App = () => {
   const [url, setUrl] = useState('');
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
+
+  const blogFormRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -62,6 +66,7 @@ const App = () => {
       setTitle('');
       setAuthor('');
       setUrl('');
+      blogFormRef.current.toggleVisibility();
       setMessage(`a new blog ${blog.title} by ${blog.author} added`);
       setMessageType('success');
       setTimeout(() => {
@@ -83,27 +88,13 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
         <Notification message={message} type={messageType} />
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input
-              type='text'
-              value={username}
-              name='Username'
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-            <input
-              type='password'
-              value={password}
-              name='Password'
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type='submit'>login</button>
-        </form>
+        <Login
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+          handleLogin={handleLogin}
+        />
       </div>
     );
   }
@@ -114,15 +105,18 @@ const App = () => {
       <Notification message={message} type={messageType} />
       <p>{user.username} logged in</p>
       <button onClick={logout}>logout</button>
-      <BlogForm
-        title={title}
-        author={author}
-        url={url}
-        setTitle={setTitle}
-        setAuthor={setAuthor}
-        setUrl={setUrl}
-        handleSubmit={handleSubmit}
-      />
+      <h2>create new</h2>
+      <Togglable ref={blogFormRef} buttonLabel='new blog'>
+        <BlogForm
+          title={title}
+          author={author}
+          url={url}
+          setTitle={setTitle}
+          setAuthor={setAuthor}
+          setUrl={setUrl}
+          handleSubmit={handleSubmit}
+        />
+      </Togglable>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
