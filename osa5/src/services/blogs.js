@@ -12,13 +12,20 @@ const create = async (newObject) => {
     headers: { Authorization: token },
   };
 
-  const response = await axios.post(baseUrl, newObject, config);
-  return response.data;
+  const { data } = await axios.post(baseUrl, newObject, config);
+  return data;
 };
 
-const getAll = () => {
-  const request = axios.get(baseUrl);
-  return request.then((response) => response.data);
+const getAll = async () => {
+  const { data } = await axios.get(baseUrl);
+  return data;
 };
 
-export default { setToken, getAll, create };
+const remove = async (id) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+  return await axios.delete(`${baseUrl}/${id}`, config);
+};
+
+export default { setToken, getAll, create, remove };
