@@ -54,6 +54,28 @@ const App = () => {
     }
   };
 
+  const createBlog = async ({ title, author, url }) => {
+    try {
+      const newBlog = {
+        title,
+        author,
+        url,
+      };
+      const blog = await blogService.create(newBlog);
+      setBlogs(blogs.concat(blog));
+      blogFormRef.current.toggleVisibility();
+      setMessage(`a new blog ${blog.title} by ${blog.author} added`);
+      setMessageType('success');
+      setTimeout(() => {
+        setMessage(null);
+        setMessageType('');
+      }, 5000);
+    } catch (err) {
+      setMessage(err.response.data.error);
+      setMessage('error');
+    }
+  };
+
   const removeBlog = async ({ id, title, author }) => {
     if (window.confirm(`Remove blog ${title} by ${author}`)) {
       try {
@@ -126,13 +148,7 @@ const App = () => {
       <button onClick={logout}>logout</button>
       <h2>create new</h2>
       <Togglable ref={blogFormRef} buttonLabel='new blog'>
-        <BlogForm
-          blogs={blogs}
-          setBlogs={setBlogs}
-          setMessage={setMessage}
-          setMessageType={setMessageType}
-          blogFormRef={blogFormRef}
-        />
+        <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs
         .sort((a, b) => b.likes - a.likes)

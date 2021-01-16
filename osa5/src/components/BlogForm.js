@@ -1,42 +1,21 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import blogService from '../services/blogs';
 
-const BlogForm = ({
-  blogs,
-  setBlogs,
-  setMessage,
-  setMessageType,
-  blogFormRef,
-}) => {
+const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const newBlog = {
-        title,
-        author,
-        url,
-      };
-      const blog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(blog));
-      setTitle('');
-      setAuthor('');
-      setUrl('');
-      blogFormRef.current.toggleVisibility();
-      setMessage(`a new blog ${blog.title} by ${blog.author} added`);
-      setMessageType('success');
-      setTimeout(() => {
-        setMessage(null);
-        setMessageType('');
-      }, 5000);
-    } catch (err) {
-      setMessage(err.response.data.error);
-      setMessage('error');
-    }
+    createBlog({
+      title,
+      author,
+      url,
+    });
+    setTitle('');
+    setAuthor('');
+    setUrl('');
   };
 
   return (
@@ -44,6 +23,7 @@ const BlogForm = ({
       <div>
         title
         <input
+          id='title'
           type='text'
           value={title}
           name='Title'
@@ -53,6 +33,7 @@ const BlogForm = ({
       <div>
         author
         <input
+          id='author'
           type='text'
           value={author}
           name='Author'
@@ -62,6 +43,7 @@ const BlogForm = ({
       <div>
         url
         <input
+          id='url'
           type='text'
           value={url}
           name='Url'
@@ -74,11 +56,7 @@ const BlogForm = ({
 };
 
 BlogForm.propTypes = {
-  blogs: PropTypes.array.isRequired,
-  setBlogs: PropTypes.func.isRequired,
-  setMessage: PropTypes.func.isRequired,
-  setMessageType: PropTypes.func.isRequired,
-  blogFormRef: PropTypes.object.isRequired,
+  createBlog: PropTypes.func.isRequired,
 };
 
 export default BlogForm;
