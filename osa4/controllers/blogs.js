@@ -47,7 +47,7 @@ blogRouter.put('/:id', async (req, res, next) => {
   try {
     const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-    });
+    }).populate('user', { username: 1, name: 1 });
     res.json(blog);
   } catch (err) {
     next(err);
