@@ -38,13 +38,13 @@ const Blog = ({ blog, setBlogs, setMessage, setMessageType, blogs }) => {
 
   return (
     <div style={blogStyle}>
-      {blog.title}{' '}
+      {blog.title} {blog.author}
       <button onClick={() => setShow(!show)}>{show ? 'hide' : 'view'}</button>
       {show && (
         <div>
           <div>{blog.url}</div>
           <div>likes {blog.likes}</div>
-          <div>{blog.author}</div>
+          <div>{blog.user.username}</div>
           <button onClick={() => removeBlog(blog)}>remove</button>
         </div>
       )}
