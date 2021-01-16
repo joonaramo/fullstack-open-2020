@@ -54,6 +54,50 @@ const App = () => {
     }
   };
 
+  const removeBlog = async ({ id, title, author }) => {
+    if (window.confirm(`Remove blog ${title} by ${author}`)) {
+      try {
+        await blogService.remove(id);
+        const newBlogs = blogs.filter((person) => person.id !== id);
+        setBlogs(newBlogs);
+        setMessage(`Removed ${title}`);
+        setMessageType('success');
+        setTimeout(() => {
+          setMessage(null);
+          setMessageType('');
+        }, 5000);
+      } catch (err) {
+        setMessage(err.response.data.error);
+        setMessageType('error');
+        setTimeout(() => {
+          setMessage(null);
+          setMessageType('');
+        }, 5000);
+      }
+    }
+  };
+
+  const likeBlog = async ({ id, user, title, author, url, likes }) => {
+    try {
+      const updatedBlog = {
+        user: user.id,
+        title,
+        author,
+        url,
+        likes: likes + 1,
+      };
+      const newBlog = await blogService.update(id, updatedBlog);
+      setBlogs(blogs.map((blog) => (blog.id !== id ? blog : newBlog)));
+    } catch (err) {
+      setMessage(err.response.data.error);
+      setMessageType('error');
+      setTimeout(() => {
+        setMessage(null);
+        setMessageType('');
+      }, 5000);
+    }
+  };
+
   const logout = () => {
     window.localStorage.removeItem('loggedInUser');
   };
@@ -96,10 +140,8 @@ const App = () => {
           <Blog
             key={blog.id}
             blog={blog}
-            setMessage={setMessage}
-            setMessageType={setMessageType}
-            setBlogs={setBlogs}
-            blogs={blogs}
+            likeBlog={likeBlog}
+            removeBlog={removeBlog}
           />
         ))}
     </div>

@@ -21,6 +21,14 @@ const getAll = async () => {
   return data;
 };
 
+const update = async (id, newObject) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+  const { data } = await axios.put(`${baseUrl}/${id}`, newObject, config);
+  return data;
+};
+
 const remove = async (id) => {
   const config = {
     headers: { Authorization: token },
@@ -28,4 +36,4 @@ const remove = async (id) => {
   return await axios.delete(`${baseUrl}/${id}`, config);
 };
 
-export default { setToken, getAll, create, remove };
+export default { setToken, getAll, create, update, remove };
