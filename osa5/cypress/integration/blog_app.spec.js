@@ -31,4 +31,19 @@ describe('Blog app', function () {
       cy.contains('invalid username or password');
     });
   });
+
+  describe('When logged in', function () {
+    beforeEach(function () {
+      cy.login({ username: 'jdoe', password: 'secret' });
+    });
+
+    it('A blog can be created', function () {
+      cy.contains('new blog').click();
+      cy.get('#title').type('React Blog');
+      cy.get('#author').type('Mary Poppins');
+      cy.get('#url').type('https://example.com/blog');
+      cy.get('#create').click();
+      cy.contains('React Blog');
+    });
+  });
 });
