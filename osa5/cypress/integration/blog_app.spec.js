@@ -1,3 +1,5 @@
+const { func } = require('prop-types');
+
 describe('Blog app', function () {
   beforeEach(function () {
     cy.request('POST', 'http://localhost:3003/api/testing/reset');
@@ -37,13 +39,19 @@ describe('Blog app', function () {
       cy.login({ username: 'jdoe', password: 'secret' });
     });
 
-    it('A blog can be created', function () {
-      cy.contains('new blog').click();
-      cy.get('#title').type('React Blog');
-      cy.get('#author').type('Mary Poppins');
-      cy.get('#url').type('https://example.com/blog');
-      cy.get('#create').click();
-      cy.contains('React Blog');
+    describe('and a note exists', function () {
+      beforeEach(function () {
+        cy.contains('new blog').click();
+        cy.get('#title').type('React Blog');
+        cy.get('#author').type('Mary Poppins');
+        cy.get('#url').type('https://example.com/blog');
+        cy.get('#create').click();
+      });
+      it('it can be liked', function () {
+        cy.contains('view').click();
+        cy.contains('React Blog').get('button').contains('like').click();
+        cy.contains('likes 1');
+      });
     });
   });
 });
