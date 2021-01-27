@@ -1,5 +1,3 @@
-const { func } = require('prop-types');
-
 describe('Blog app', function () {
   beforeEach(function () {
     cy.request('POST', 'http://localhost:3003/api/testing/reset');
@@ -66,6 +64,51 @@ describe('Blog app', function () {
         cy.contains('view').click();
         cy.contains('React Blog').get('button').contains('remove').click();
         cy.contains('Removed React Blog');
+      });
+    });
+    describe('multiple blogs exist', function () {
+      beforeEach(function () {
+        cy.createBlog({
+          title: 'React Blog',
+          author: 'Mary Poppins',
+          url: 'https://example.com/blog',
+        });
+        cy.createBlog({
+          title: 'Vue Blog',
+          author: 'Jack Doe',
+          url: 'https://example.com/blog',
+          likes: 9000,
+        });
+        cy.createBlog({
+          title: 'Angular Blog',
+          author: 'Donald Duck',
+          url: 'https://example.com/blog',
+          likes: 50,
+        });
+        cy.createBlog({
+          title: 'Aku Ankan Parhaat',
+          author: 'Mikki Hiiri',
+          url: 'https://example.com/blog',
+          likes: 100,
+        });
+      });
+      it('they are sorted by likes', function () {
+        cy.get('.blog').then((blogs) => {
+          let blogLikes = 9000;
+          for (let i = 0; i < blogs.length; i++) {
+            cy.wrap(blogs[i]).contains('view').click();
+            cy.wrap(blogs[i])
+              .contains('likes')
+              .then((el) => el.text())
+              .then((elValue) => {
+                const likes = parseInt(elValue.replace('likes ', ''));
+                if (likes > blogLikes) {
+                  throw new Error('blogs are not sorted');
+                }
+                blogLikes = likes;
+              });
+          }
+        });
       });
     });
   });
