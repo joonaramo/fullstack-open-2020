@@ -39,18 +39,33 @@ describe('Blog app', function () {
       cy.login({ username: 'jdoe', password: 'secret' });
     });
 
-    describe('and a note exists', function () {
+    it('a new blog can be created', () => {
+      cy.contains('new blog').click();
+      cy.get('#title').type('React Blog');
+      cy.get('#author').type('Mary Poppins');
+      cy.get('#url').type('https://example.com/blog');
+      cy.get('#create').click();
+    });
+
+    describe('and a blog exists', function () {
       beforeEach(function () {
-        cy.contains('new blog').click();
-        cy.get('#title').type('React Blog');
-        cy.get('#author').type('Mary Poppins');
-        cy.get('#url').type('https://example.com/blog');
-        cy.get('#create').click();
+        cy.createBlog({
+          title: 'React Blog',
+          author: 'Mary Poppins',
+          url: 'https://example.com/blog',
+        });
       });
+
       it('it can be liked', function () {
         cy.contains('view').click();
         cy.contains('React Blog').get('button').contains('like').click();
         cy.contains('likes 1');
+      });
+
+      it('can be deleted', function () {
+        cy.contains('view').click();
+        cy.contains('React Blog').get('button').contains('remove').click();
+        cy.contains('Removed React Blog');
       });
     });
   });
