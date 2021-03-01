@@ -1,4 +1,4 @@
-const initialState = {};
+const initialState = '';
 
 const notificationReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -6,24 +6,23 @@ const notificationReducer = (state = initialState, action) => {
       const newNotification = action.data;
       return newNotification;
     case 'DELETE_NOTIFICATION':
-      return {};
+      return '';
     default:
       return state;
   }
 };
 
-export const createNotification = (message) => {
-  return {
-    type: 'CREATE_NOTIFICATION',
-    data: {
-      message,
-    },
-  };
-};
-
-export const deleteNotification = () => {
-  return {
-    type: 'DELETE_NOTIFICATION',
+export const setNotification = (message, timeout) => {
+  return async (dispatch) => {
+    dispatch({
+      type: 'CREATE_NOTIFICATION',
+      data: message,
+    });
+    setTimeout(() => {
+      dispatch({
+        type: 'DELETE_NOTIFICATION',
+      });
+    }, timeout);
   };
 };
 
