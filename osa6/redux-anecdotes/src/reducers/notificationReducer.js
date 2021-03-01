@@ -1,12 +1,15 @@
-const initialState = '';
+const initialState = { message: '', timeoutId: null };
 
 const notificationReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'CREATE_NOTIFICATION':
+      if (state.timeoutId !== null) {
+        clearTimeout(state.timeoutId);
+      }
       const newNotification = action.data;
       return newNotification;
     case 'DELETE_NOTIFICATION':
-      return '';
+      return initialState;
     default:
       return state;
   }
@@ -14,15 +17,15 @@ const notificationReducer = (state = initialState, action) => {
 
 export const setNotification = (message, timeout) => {
   return async (dispatch) => {
-    dispatch({
-      type: 'CREATE_NOTIFICATION',
-      data: message,
-    });
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       dispatch({
         type: 'DELETE_NOTIFICATION',
       });
     }, timeout);
+    dispatch({
+      type: 'CREATE_NOTIFICATION',
+      data: { message, timeoutId },
+    });
   };
 };
 

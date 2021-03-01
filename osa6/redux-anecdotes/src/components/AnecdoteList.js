@@ -4,7 +4,7 @@ import { voteAnecdote } from '../reducers/anecdoteReducer';
 import { setNotification } from '../reducers/notificationReducer';
 import Filter from './Filter';
 
-const AnecdoteList = ({ anecdotes, filter, voteAnecdote }) => {
+const AnecdoteList = ({ anecdotes, voteAnecdote, setNotification }) => {
   const vote = (anecdote) => {
     voteAnecdote(anecdote);
     setNotification(`You voted ${anecdote.content}`, 5000);
