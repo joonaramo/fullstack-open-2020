@@ -5,6 +5,7 @@ import {
   Route,
   Link,
   useParams,
+  useHistory,
 } from 'react-router-dom';
 
 const Menu = () => {
@@ -92,6 +93,7 @@ const Footer = () => (
 );
 
 const CreateNew = (props) => {
+  const history = useHistory();
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [info, setInfo] = useState('');
@@ -104,6 +106,7 @@ const CreateNew = (props) => {
       info,
       votes: 0,
     });
+    history.push('/');
   };
 
   return (
@@ -140,6 +143,10 @@ const CreateNew = (props) => {
   );
 };
 
+const Notification = ({ notification }) => {
+  return <p>{notification}</p>;
+};
+
 const App = () => {
   const [anecdotes, setAnecdotes] = useState([
     {
@@ -163,6 +170,10 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = (Math.random() * 10000).toFixed(0);
     setAnecdotes(anecdotes.concat(anecdote));
+    setNotification(`a new ancedote ${anecdote.content} created!`);
+    setTimeout(() => {
+      setNotification('');
+    }, 1000);
   };
 
   const anecdoteById = (id) => anecdotes.find((a) => a.id === id);
@@ -183,6 +194,7 @@ const App = () => {
       <div>
         <h1>Software anecdotes</h1>
         <Menu />
+        {notification && <Notification />}
       </div>
       <Switch>
         <Route exact path='/'>
