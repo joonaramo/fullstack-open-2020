@@ -2,7 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { connect } from 'react-redux';
 import { setNotification } from './reducers/notificationReducer';
-import { getBlogs, createBlog } from './reducers/blogReducer';
+import {
+  getBlogs,
+  createBlog,
+  likeBlog,
+  deleteBlog,
+} from './reducers/blogReducer';
 import './App.css';
 import Blog from './components/Blog';
 import BlogForm from './components/BlogForm';
@@ -12,7 +17,13 @@ import Togglable from './components/Togglable';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
-const App = ({ setNotification, getBlogs, createBlog }) => {
+const App = ({
+  setNotification,
+  getBlogs,
+  createBlog,
+  likeBlog,
+  deleteBlog,
+}) => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -66,11 +77,10 @@ const App = ({ setNotification, getBlogs, createBlog }) => {
     }
   };
 
-  const removeBlog = async ({ id, title, author }) => {
+  const handleBlogDelete = async ({ id, title, author }) => {
     if (window.confirm(`Remove blog ${title} by ${author}`)) {
       try {
-        await blogService.remove(id);
-        // Remove blog
+        deleteBlog(id);
         setNotification(`Removed ${title}`, 'success', 5000);
       } catch (err) {
         setNotification(err.response.data.error, 'error', 5000);
@@ -78,17 +88,9 @@ const App = ({ setNotification, getBlogs, createBlog }) => {
     }
   };
 
-  const likeBlog = async ({ id, user, title, author, url, likes }) => {
+  const handleBlogLike = async (blog) => {
     try {
-      const updatedBlog = {
-        user: user.id,
-        title,
-        author,
-        url,
-        likes: likes + 1,
-      };
-      const newBlog = await blogService.update(id, updatedBlog);
-      // Like blog
+      likeBlog(blog);
     } catch (err) {
       setNotification(err.response.data.error, 'error', 5000);
     }
@@ -130,8 +132,8 @@ const App = ({ setNotification, getBlogs, createBlog }) => {
           <Blog
             key={blog.id}
             blog={blog}
-            likeBlog={likeBlog}
-            removeBlog={removeBlog}
+            likeBlog={handleBlogLike}
+            removeBlog={handleBlogDelete}
           />
         ))}
     </div>
@@ -142,6 +144,8 @@ const mapDispatchToProps = {
   setNotification,
   getBlogs,
   createBlog,
+  likeBlog,
+  deleteBlog,
 };
 
 export default connect(null, mapDispatchToProps)(App);
