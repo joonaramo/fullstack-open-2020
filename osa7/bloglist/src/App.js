@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { connect } from 'react-redux';
 import { setNotification } from './reducers/notificationReducer';
+import { getBlogs, createBlog } from './reducers/blogReducer';
 import './App.css';
 import Blog from './components/Blog';
 import BlogForm from './components/BlogForm';
@@ -10,19 +12,15 @@ import Togglable from './components/Togglable';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
-const App = ({ setNotification }) => {
-  const [blogs, setBlogs] = useState([]);
+const App = ({ setNotification, getBlogs, createBlog }) => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const blogs = useSelector((state) => state.blog);
 
   const blogFormRef = useRef();
 
   useEffect(() => {
-    const getBlogs = async () => {
-      const blogs = await blogService.getAll();
-      setBlogs(blogs);
-    };
     getBlogs();
   }, []);
 
@@ -49,18 +47,17 @@ const App = ({ setNotification }) => {
     }
   };
 
-  const createBlog = async ({ title, author, url }) => {
+  const handleBlogSubmit = async ({ title, author, url }) => {
     try {
       const newBlog = {
         title,
         author,
         url,
       };
-      const blog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(blog));
+      createBlog(newBlog);
       blogFormRef.current.toggleVisibility();
       setNotification(
-        `a new blog ${blog.title} by ${blog.author} added`,
+        `a new blog ${newBlog.title} by ${newBlog.author} added`,
         'success',
         5000
       );
@@ -73,8 +70,7 @@ const App = ({ setNotification }) => {
     if (window.confirm(`Remove blog ${title} by ${author}`)) {
       try {
         await blogService.remove(id);
-        const newBlogs = blogs.filter((person) => person.id !== id);
-        setBlogs(newBlogs);
+        // Remove blog
         setNotification(`Removed ${title}`, 'success', 5000);
       } catch (err) {
         setNotification(err.response.data.error, 'error', 5000);
@@ -92,7 +88,7 @@ const App = ({ setNotification }) => {
         likes: likes + 1,
       };
       const newBlog = await blogService.update(id, updatedBlog);
-      setBlogs(blogs.map((blog) => (blog.id !== id ? blog : newBlog)));
+      // Like blog
     } catch (err) {
       setNotification(err.response.data.error, 'error', 5000);
     }
@@ -126,7 +122,7 @@ const App = ({ setNotification }) => {
       <button onClick={logout}>logout</button>
       <h2>create new</h2>
       <Togglable ref={blogFormRef} buttonLabel='new blog'>
-        <BlogForm createBlog={createBlog} />
+        <BlogForm createBlog={handleBlogSubmit} />
       </Togglable>
       {blogs
         .sort((a, b) => b.likes - a.likes)
@@ -144,6 +140,8 @@ const App = ({ setNotification }) => {
 
 const mapDispatchToProps = {
   setNotification,
+  getBlogs,
+  createBlog,
 };
 
 export default connect(null, mapDispatchToProps)(App);
