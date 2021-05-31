@@ -32,6 +32,7 @@ blogRouter.post('/', async (req, res, next) => {
     const blog = await newBlog.save();
     user.blogs = user.blogs.concat(blog._id);
     await user.save();
+    await blog.populate('user').execPopulate();
     res.status(201).json(blog);
   } catch (err) {
     next(err);
@@ -45,9 +46,11 @@ blogRouter.put('/:id', async (req, res, next) => {
     return res.status(400).json({ error: 'Missing URL' });
   }
   try {
+    let updatedBlog = req.body;
+    updatedBlog.user = updatedBlog.user.id;
     const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-    }).populate('user', { username: 1, name: 1 });
+    });
     res.json(blog);
   } catch (err) {
     next(err);
