@@ -11,11 +11,11 @@ interface ExerciseResult {
 const parseArgs = (args: Array<string>) => {
   if (args.length < 4) throw new Error('Not enough arguments');
 
-  const arguments = process.argv.slice(2);
-  const target = Number(arguments[0]);
-  const exercises = arguments.slice(1).map((e) => Number(e));
+  const argList = process.argv.slice(2);
+  const target = Number(argList[0]);
+  const exercises = argList.slice(1).map((e) => Number(e));
 
-  arguments.map((e) => {
+  argList.map((e) => {
     if (isNaN(Number(e))) {
       throw new Error('Provided values were not numbers!');
     }
@@ -70,5 +70,7 @@ try {
   const text = calculateExercises(arr, targetHours);
   console.log(text);
 } catch (err) {
-  console.log('Error:', err.message);
+  if (err instanceof Error) {
+    console.log('Error:', err.message);
+  }
 }
