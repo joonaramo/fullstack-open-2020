@@ -5,6 +5,7 @@ const toNewPatient = (object: any): NewPatient => {
     name: parseName(object.name),
     dateOfBirth: parseDate(object.dateOfBirth),
     ssn: parseSSN(object.ssn),
+    entries: object.entries,
     gender: parseGender(object.gender),
     occupation: parseOccupation(object.occupation),
   };
