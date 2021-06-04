@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GenderIcon from '../components/GenderIcon';
 import { apiBaseUrl } from '../constants';
-import { useStateValue } from '../state';
+import { setSinglePatient, useStateValue } from '../state';
 import { Patient } from '../types';
 
 const SinglePatientPage = () => {
@@ -15,12 +15,14 @@ const SinglePatientPage = () => {
         const { data: singlePatient } = await axios.get<Patient>(
           `${apiBaseUrl}/patients/${id}`
         );
-        dispatch({ type: 'SET_SINGLE_PATIENT', payload: singlePatient });
+        dispatch(setSinglePatient(singlePatient));
       } catch (e) {
         console.error(e);
       }
     };
-    void fetchSinglePatient();
+    if (patient.id !== id) {
+      void fetchSinglePatient();
+    }
   }, [dispatch]);
 
   return (
@@ -31,6 +33,17 @@ const SinglePatientPage = () => {
       <p>ssn: {patient.ssn}</p>
       <p>occupation: {patient.occupation}</p>
       <p>date of birth: {patient.dateOfBirth}</p>
+      <h3>entries</h3>
+      {patient.entries.map((entry) => (
+        <p key={entry.id}>
+          {entry.date} {entry.description}
+          <ul>
+            {entry.diagnosisCodes?.map((code) => (
+              <li key={code}>{code}</li>
+            ))}
+          </ul>
+        </p>
+      ))}
     </div>
   );
 };
