@@ -12,7 +12,6 @@ router.get('/', (_req, res) => {
 router.get('/:id', (req, res) => {
   const patient = patientService.findById(req.params.id);
   if (patient) {
-    patient.entries = patient.entries || [];
     res.json(patient);
   } else {
     res.status(404).json({ error: 'Not found' });
