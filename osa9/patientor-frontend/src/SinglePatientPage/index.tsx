@@ -3,11 +3,12 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GenderIcon from '../components/GenderIcon';
 import { apiBaseUrl } from '../constants';
-import { setSinglePatient, useStateValue } from '../state';
-import { Patient } from '../types';
+import { setDiagnosisList, setSinglePatient, useStateValue } from '../state';
+import { Diagnosis, Patient } from '../types';
+import EntryDetails from './EntryDetails';
 
 const SinglePatientPage = () => {
-  const [{ patient }, dispatch] = useStateValue();
+  const [{ patient, diagnoses }, dispatch] = useStateValue();
   const { id } = useParams<{ id: string }>();
   useEffect(() => {
     const fetchSinglePatient = async () => {
@@ -20,9 +21,20 @@ const SinglePatientPage = () => {
         console.error(e);
       }
     };
+    const fetchDiagnoses = async () => {
+      try {
+        const { data: diagnoses } = await axios.get<Diagnosis[]>(
+          `${apiBaseUrl}/diagnoses`
+        );
+        dispatch(setDiagnosisList(diagnoses));
+      } catch (e) {
+        console.error(e);
+      }
+    };
     if (patient.id !== id) {
       void fetchSinglePatient();
     }
+    void fetchDiagnoses();
   }, [dispatch]);
 
   return (
@@ -35,14 +47,7 @@ const SinglePatientPage = () => {
       <p>date of birth: {patient.dateOfBirth}</p>
       <h3>entries</h3>
       {patient.entries.map((entry) => (
-        <p key={entry.id}>
-          {entry.date} {entry.description}
-          <ul>
-            {entry.diagnosisCodes?.map((code) => (
-              <li key={code}>{code}</li>
-            ))}
-          </ul>
-        </p>
+        <EntryDetails entry={entry} diagnoses={diagnoses} key={entry.id} />
       ))}
     </div>
   );
