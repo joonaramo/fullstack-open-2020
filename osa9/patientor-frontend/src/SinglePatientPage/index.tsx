@@ -1,13 +1,17 @@
 import axios from 'axios';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Button } from 'semantic-ui-react';
+import AddEntryModal from '../AddEntryModal';
 import GenderIcon from '../components/GenderIcon';
 import { apiBaseUrl } from '../constants';
 import { setDiagnosisList, setSinglePatient, useStateValue } from '../state';
-import { Diagnosis, Patient } from '../types';
+import { Diagnosis, EntryWithoutId, Patient } from '../types';
 import EntryDetails from './EntryDetails';
 
 const SinglePatientPage = () => {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
   const [{ patient, diagnoses }, dispatch] = useStateValue();
   const { id } = useParams<{ id: string }>();
   useEffect(() => {
@@ -37,6 +41,28 @@ const SinglePatientPage = () => {
     void fetchDiagnoses();
   }, [dispatch]);
 
+  const openModal = (): void => setModalOpen(true);
+
+  const closeModal = (): void => {
+    setModalOpen(false);
+    setError(undefined);
+  };
+
+  const submitNewEntry = async (values: EntryWithoutId) => {
+    try {
+      const { data: updatedPatient } = await axios.post<Patient>(
+        `${apiBaseUrl}/patients/${id}/entries`,
+        values
+      );
+      dispatch(setSinglePatient(updatedPatient));
+      closeModal();
+    } catch (e) {
+      console.error(e.response?.data || 'Unknown Error');
+      setError(e.response?.data?.error || 'Unknown error');
+    }
+  };
+
+
   return (
     <div>
       <h1>
@@ -49,6 +75,13 @@ const SinglePatientPage = () => {
       {patient.entries.map((entry) => (
         <EntryDetails entry={entry} diagnoses={diagnoses} key={entry.id} />
       ))}
+      <AddEntryModal
+        modalOpen={modalOpen}
+        onSubmit={submitNewEntry}
+        error={error}
+        onClose={closeModal}
+      />
+      <Button onClick={() => openModal()}>Add New Entry</Button>
     </div>
   );
 };
